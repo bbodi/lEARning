@@ -10,7 +10,7 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.UI;
-import hu.nevermind.learning.view.DashBoardView;
+import hu.nevermind.learning.view.MainView;
 import hu.nevermind.learning.view.LoginView;
 import javax.inject.Inject;
 
@@ -33,7 +33,7 @@ public class MyVaadinUI extends UI {
 		navigator = new Navigator(this, this);
 		navigator.addProvider(navigatorViewProvider);
 		getNavigator().addView(LoginView.NAME, LoginView.class);
-		getNavigator().addView(DashBoardView.NAME, DashBoardView.class);
+		getNavigator().addView(MainView.NAME, MainView.class);
 		getNavigator().addViewChangeListener(new ViewChangeListener() {
 
 			@Override

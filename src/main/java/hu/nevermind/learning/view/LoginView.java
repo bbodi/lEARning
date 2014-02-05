@@ -113,7 +113,7 @@ public class LoginView extends CustomComponent implements View, Button.ClickList
 				initializerBean.init();
 			}
             getSession().setAttribute("user", user);
-            getUI().getNavigator().navigateTo(DashBoardView.NAME);
+            getUI().getNavigator().navigateTo(MainView.NAME);
 
         } else {
             this.passwordField.setValue(null);

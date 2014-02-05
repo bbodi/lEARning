@@ -11,6 +11,7 @@ import javax.persistence.OneToMany;
 @Entity
 @NamedQueries({
 	@NamedQuery(name = "Question.findAll", query = "SELECT q FROM Question q"),
+	@NamedQuery(name = "Question.findBySubcategoryAndLimit", query = "SELECT q FROM Question q WHERE q.category = :subCategory"),
 })
 public class Question extends BaseEntity {
 	
