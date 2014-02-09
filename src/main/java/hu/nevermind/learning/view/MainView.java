@@ -28,7 +28,7 @@ public class MainView extends CustomComponent implements View {
 	@Inject
 	private ExamView examView;
 
-	Button logout = new Button("Logout", new Button.ClickListener() {
+	Button logoutButton = new Button("Logout", new Button.ClickListener() {
 
 		@Override
 		public void buttonClick(ClickEvent event) {
@@ -46,9 +46,12 @@ public class MainView extends CustomComponent implements View {
 		final Label title = new Label("lEARning");
 		title.setSizeFull();
 		headerLay.addComponent(title);
-		headerLay.addComponent(logout);
-		headerLay.setExpandRatio(title, 4);
-		headerLay.setExpandRatio(logout, 1);
+		headerLay.setComponentAlignment(title, Alignment.MIDDLE_CENTER);
+		headerLay.addComponent(logoutButton);
+		headerLay.setComponentAlignment(logoutButton, Alignment.MIDDLE_RIGHT);
+		headerLay.setWidth(1000, Unit.PIXELS);
+		//headerLay.setExpandRatio(title, 4);
+		//headerLay.setExpandRatio(logoutButton, 1);
 		return headerLay;
 	}
 
@@ -60,14 +63,16 @@ public class MainView extends CustomComponent implements View {
 	@Override
 	public void enter(ViewChangeListener.ViewChangeEvent event) {
 		final VerticalLayout mainLayout = new VerticalLayout();
-		mainLayout.addComponent(initHeader());
+		final Component header = initHeader();
+		mainLayout.addComponent(header);
+		mainLayout.setComponentAlignment(header, Alignment.MIDDLE_CENTER);
 		final HorizontalLayout bodyLayout = new HorizontalLayout();
 		final String parameters = event.getParameters();
 		mainPanel = new Panel();
 		if (parameters == null || parameters.isEmpty()) {
 			final Component center = dashBoardView.createScreen(getUI(), getSession());
 			mainPanel.setContent(center);
-		} else if ("exam".equals(parameters)){
+		} else if (ExamView.NAME.equals(parameters)){
 			final List<Subcategory> categories = (List<Subcategory>) getSession().getAttribute("categories");
 			final int numberOfQuestions = (int) getSession().getAttribute("numberOfQuestionsPerCategory");
 			final Component center = examView.createScreen(getUI(), getSession(), categories, numberOfQuestions);
@@ -87,8 +92,6 @@ public class MainView extends CustomComponent implements View {
 		mainLayout.setComponentAlignment(bodyLayout, Alignment.MIDDLE_CENTER);
 
 		setCompositionRoot(mainLayout);
-		// Get the user name from the session
-		String username = String.valueOf(getSession().getAttribute("user"));
 	}
 
 }

@@ -2,16 +2,18 @@ package hu.nevermind.learning.entity;
 
 import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
 
 @Entity
 @NamedQueries({
 	@NamedQuery(name = "Category.findAll", query = "SELECT c FROM Category c"),
+	@NamedQuery(name = "Category.findAllCount", query = "SELECT COUNT(c) FROM Category c")
 })
 public class Category extends BaseEntity {
+	
 	@OneToMany(mappedBy = "category")
 	private List<Subcategory> subcategorys;
 	

@@ -42,9 +42,9 @@ public class PrepReader {
 	private static final HashMap questionURLData = new HashMap();
 	private static final HashMap questionSpecificPartData = new HashMap();
 
-	public static List<HashMap> getMaps() {
+	public static List<HashMap> getMaps(final String filename) {
 		try {
-			InputStream fis = PrepReader.class.getClassLoader().getResourceAsStream("ejbplusv6.ets");
+			InputStream fis = PrepReader.class.getClassLoader().getResourceAsStream(filename);
 			int totalfilesize = fis.available();
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			String versioninfile = (String) ois.readObject();

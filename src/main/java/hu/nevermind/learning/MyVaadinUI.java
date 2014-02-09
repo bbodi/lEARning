@@ -1,7 +1,5 @@
 package hu.nevermind.learning;
 
-
-import hu.nevermind.learning.service.UserService;
 import com.vaadin.annotations.Theme;
 import com.vaadin.cdi.CDIUI;
 import com.vaadin.cdi.CDIViewProvider;
@@ -18,9 +16,6 @@ import javax.inject.Inject;
 @SuppressWarnings("serial")
 @CDIUI
 public class MyVaadinUI extends UI {
-
-	@Inject
-	private UserService userService;
 	
 	@Inject
     CDIViewProvider navigatorViewProvider;

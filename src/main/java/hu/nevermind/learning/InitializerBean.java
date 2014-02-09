@@ -6,49 +6,55 @@ import hu.nevermind.learning.entity.Category;
 import hu.nevermind.learning.entity.Question;
 import hu.nevermind.learning.entity.Subcategory;
 import hu.nevermind.learning.misc.PrepReader;
-import hu.nevermind.learning.service.QuestionService;
+import hu.nevermind.learning.service.DataStore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
-import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
+/**
+ * Nem tudok @Singleton, @Startup-ot használni, mert a Vaadin CDI nem indítja el automatikusan
+ */
 @Stateless
 public class InitializerBean {
 
 	private final static Logger logger = Logger.getLogger(InitializerBean.class.getName());
 
-	@PersistenceContext(unitName = "learningPU")
-	private EntityManager em;
-
-	@Inject
-	QuestionService questionService;
-
-	public void init() {
-		if (questionService.allQuestions().isEmpty() == false) {
+	public void init(final DataStore dataStore) {
+		if (dataStore.allCategoriesCount() > 0) {
 			return;
 		}
 
-		Category ejbCategory = new Category();
-		ejbCategory.setName("Enterprise JavaBeans Developer");
-		em.persist(ejbCategory);
-		// Oracle Certified Expert, Java EE 6 
-		em.persist(new Category("Java Persistence API Developer"));
-		em.persist(new Category("Web Component Developer"));
-		em.persist(new Category("Web Services Developer"));
+		final Category ejbCategory = new Category("Enterprise JavaBeans Developer");
+		final Category jpaCategory = new Category("Java Persistence API Developer");
+		final Category webComponentCategory = new Category("Web Component Developer");
+		final Category webServicesDeveloper = new Category("Web Services Developer");
+		final Category ocaCategory = new Category("Oracle Certified Associate, Java SE 7 Programmer");
+		final Category ocjpCategory = new Category("Oracle Certified Professional, Java SE 7 Programmer");
+		
+		dataStore.persist(webServicesDeveloper);
+		dataStore.persist(ocaCategory);
+		dataStore.persist(ocjpCategory);
+		dataStore.persist(ejbCategory);
+		dataStore.persist(jpaCategory);
+		dataStore.persist(webComponentCategory);
+		
+		fillDb(dataStore, ocaCategory, "japv7.ets");
+		fillDb(dataStore, ocjpCategory, "jqplusv7.ets");
+		fillDb(dataStore, ejbCategory, "ejbplusv6.ets");
+		fillDb(dataStore, jpaCategory, "jpapv6.ets");
+		fillDb(dataStore, webServicesDeveloper, "jwspv6.ets");
+		fillDb(dataStore, webComponentCategory, "jwpv6.ets");
+		dataStore.flush();
+	}
 
-		em.persist(new Category("Oracle Certified Associate, Java SE 7 Programmer"));
-		em.persist(new Category("Oracle Certified Professional, Java SE 7 Programmer"));
-
+	private void fillDb(final DataStore dataStore, final Category category, final String fileName) {
 		final HashMap<String, Question> questionMap = new HashMap<>();
 		final HashMap<String, List<Answer>> answers = new HashMap<>();
 		final HashMap<Integer, Subcategory> sectionMap = new HashMap<>();
 		final HashMap<Integer, List<String>> sectionToQuestionMap = new HashMap<>();
-		final List<HashMap> maps = PrepReader.getMaps();
+		final List<HashMap> maps = PrepReader.getMaps(fileName);
 		int i = 0;
 		for (HashMap database : maps) {
 			final String cn = (String) database.get("cn");
@@ -83,6 +89,7 @@ public class InitializerBean {
 				for (Object[] entry : (ArrayList<Object[]>) database.get("data")) {
 					final Subcategory entity = new Subcategory();
 					entity.setName((String) entry[1]);
+					entity.setDescription((String) entry[2]);
 					sectionMap.put((Integer) entry[0], entity);
 				}
 			} else if ("qsmap".equals(cn)) {
@@ -97,23 +104,29 @@ public class InitializerBean {
 				}
 			}
 		}
+		category.setSubcategorys(new ArrayList<Subcategory>());
 		for (final Integer sectionId : sectionMap.keySet()) {
 			final Subcategory section = sectionMap.get(sectionId);
-			section.setCategory(ejbCategory);
-			em.persist(section);
+			section.setQuestions(new ArrayList<Question>());
+			section.setCategory(category);
+			category.getSubcategorys().add(section);
+			dataStore.persist(section);
 			final List<String> qids = sectionToQuestionMap.get(sectionId);
 			for (final String qid : qids) {
 				final Question question = questionMap.get(qid);
 				question.setCategory(section);
+				question.setAnswers(new ArrayList<Answer>());
+				section.getQuestions().add(question);
 				final List<Answer> answerList = answers.get(qid);
 				if (answerList == null) {
 					logger.log(Level.WARNING, "No answers for: {0}\n Question won't be persisted!", question.getProblemStatement());
 					continue;
 				}
-				em.persist(question);
+				dataStore.persist(question);
 				for (Answer ans : answerList) {
 					ans.setQuestion(question);
-					em.persist(ans);
+					dataStore.persist(ans);
+					question.getAnswers().add(ans);
 				}
 			}
 		}
